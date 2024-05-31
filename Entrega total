@@ -1,1 +1,382 @@
 
+const readline = require('readline').createInterface({
+    input: process.stdin,
+    output: process.stdout
+  });
+  //Coloquei as classes e seus atributos
+  class Pedido {
+    constructor(id, idCliente, status, dataPedido) {
+      this.id = id;
+      this.idCliente = idCliente;
+      this.status = status;
+      this.dataPedido = dataPedido;
+      this.avaliacao = null;
+    }
+  }
+  
+  class Funcionario {
+    constructor(id, nomeUsuario, cpf, email, senha) {
+      this.id = id;
+      this.nomeUsuario = nomeUsuario;
+      this.cpf = cpf;
+      this.email = email;
+      this.senha = senha;
+    }
+  }
+  
+  class Cliente {
+    constructor(id, nome, dataNascimento, cpf, email, senha) {
+      this.id = id;
+      this.nome = nome;
+      this.dataNascimento = dataNascimento;
+      this.cpf = cpf;
+      this.email = email;
+      this.senha = senha;
+    }
+  }
+  
+  class Produto {
+    constructor(dataValidade, preco, quantidadeEstoque, nome, descricao) {
+      this.dataValidade = dataValidade;
+      this.preco = preco;
+      this.quantidadeEstoque = quantidadeEstoque;
+      this.nome = nome;
+      this.descricao = descricao;
+    }
+  }
+  //nesta classe, o usuário logado é inexistente.pois, ainda não foi criado
+  class Sistema {
+    constructor() {
+      this.funcionarios = [];
+      this.clientes = [];
+      this.pedidos = [];
+      this.produtos = [];
+      this.usuarioLogado = null;
+    }
+  
+    login() {
+      readline.question('Digite seu email: ', email => {
+        readline.question('Digite sua senha: ', senha => {
+          const user = this.funcionarios.find(f => f.email === email && f.senha === senha) ||
+                       this.clientes.find(c => c.email === email && c.senha === senha);
+          if (user) {
+            this.usuarioLogado = user;
+            console.log('Login realizado com sucesso!');
+            this.menuUsuario();
+          } else {
+            console.log('Email ou senha incorretos.');
+            this.menuPrincipal();
+          }
+        });
+      });
+    }
+  
+    cadastrar() {
+      readline.question('Digite seu tipo (cliente/funcionario): ', tipo => {
+        if (tipo === 'cliente' || tipo === 'funcionario') {
+          readline.question('Digite seu nome: ', nome => {
+            readline.question('Digite seu CPF: ', cpf => {
+              readline.question('Digite seu email: ', email => {
+                readline.question('Digite sua senha: ', senha => {
+                  const id = tipo === 'cliente' ? this.clientes.length + 1 : this.funcionarios.length + 1;
+                  const novoUsuario = tipo === 'cliente' ? 
+                    new Cliente(id, nome, '01-01-2000', cpf, email, senha) : 
+                    new Funcionario(id, nome, cpf, email, senha);
+                  if (tipo === 'cliente') this.clientes.push(novoUsuario);
+                  else this.funcionarios.push(novoUsuario);
+                  console.log('Cadastro realizado com sucesso!');
+                  this.menuPrincipal();
+                });
+              });
+            });
+          });
+        } else {
+          console.log('Tipo inválido.');
+          this.menuPrincipal();
+        }
+      });
+    }
+  
+    sair() {
+      console.log('Saindo do programa...');
+      readline.close();
+    }
+  //No menu, optei por dar um console.log para cada um. dessa maneira as opções ficam mais simples
+    menuPrincipal() {
+      console.log('\n1. Fazer Login');
+      console.log('2. Fazer Cadastro');
+      console.log('3. Sair do Programa');
+      readline.question('Escolha uma opção: ', opcao => {
+        switch(opcao) {
+          case '1':
+            this.login();
+            break;
+          case '2':
+            this.cadastrar();
+            break;
+          case '3':
+            this.sair();
+            break;
+          default:
+            console.log('Opção inválida.');
+            this.menuPrincipal();
+        }
+      });
+    }
+  //assim como no menu principal usei um console.log para cada opção
+    menuUsuario() {
+      if (this.usuarioLogado instanceof Cliente) {
+        console.log('\n1. Ver meus Dados');
+        console.log('2. Modificar Meus Dados');
+        console.log('3. Ver Lista de Produtos (Ordem Alfabética)');
+        console.log('4. Fazer pedido');
+        console.log('5. Cancelar pedido');
+        console.log('6. Ver meus pedidos (Ordem Cronológica)');
+        console.log('7. Avaliar pedido');
+        console.log('8. Visualizar avaliações');
+        readline.question('Escolha uma opção: ', opcao => {
+          switch(opcao) {
+            case '1':
+              this.verMeusDados();
+              break;
+            case '2':
+              this.modificarMeusDados();
+              break;
+            case '3':
+              this.verListaDeProdutos();
+              break;
+            case '4':
+              this.fazerPedido();
+              break;
+            case '5':
+              this.cancelarPedido();
+              break;
+            case '6':
+              this.verMeusPedidos();
+              break;
+            case '7':
+              this.avaliarPedido();
+              break;
+            case '8':
+              this.visualizarAvaliacoes();
+              break;
+            default:
+              console.log('Opção inválida.');
+              this.menuUsuario();
+          }
+        });
+      } else if (this.usuarioLogado instanceof Funcionario) {
+        console.log('\n4. Ver Meus Dados');
+        console.log('5. Modificar Meus Dados');
+        console.log('6. Ver Lista de Pedidos (Ordem Cronológica)');
+        console.log('7. Ver Lista de Produtos (Ordem Alfabética)');
+        console.log('8. Ver Lista de Clientes (Ordem Alfabética)');
+        console.log('9. Mudar status do pedido');
+        console.log('10. Adicionar Produto');
+        console.log('11. Editar Produto');
+        console.log('12. Excluir Produto');
+        readline.question('Escolha uma opção: ', opcao => {
+          switch(opcao) {
+            case '4':
+              this.verMeusDados();
+              break;
+            case '5':
+              this.modificarMeusDados();
+              break;
+            case '6':
+              this.verListaDePedidos();
+              break;
+            case '7':
+              this.verListaDeProdutos();
+              break;
+            case '8':
+              this.verListaDeClientes();
+              break;
+            case '9':
+              this.mudarStatusPedido();
+              break;
+            case '10':
+              this.adicionarProduto();
+              break;
+            case '11':
+              this.editarProduto();
+              break;
+            case '12':
+              this.excluirProduto();
+              break;
+            default:
+              console.log('Opção inválida.');
+              this.menuUsuario();
+          }
+        });
+      }
+    }
+  
+    verMeusDados() {
+      console.log('\nMeus Dados:', this.usuarioLogado);
+      this.menuUsuario();
+    }
+  
+    modificarMeusDados() {
+      readline.question('Digite o novo nome: ', nome => {
+        this.usuarioLogado.nome = nome;
+        console.log('Dados atualizados com sucesso!');
+        this.menuUsuario();
+      });
+    }
+  
+    verListaDePedidos() {
+      console.log('\nLista de Pedidos:');
+      this.pedidos.sort((a, b) => new Date(a.dataPedido) - new Date(b.dataPedido))
+                   .forEach(pedido => console.log(pedido));
+      this.menuUsuario();
+    }
+  
+    verListaDeProdutos() {
+      console.log('\nLista de Produtos:');
+      this.produtos.sort((a, b) => a.nome.localeCompare(b.nome))
+                   .forEach(produto => console.log(produto));
+      this.menuUsuario();
+    }
+  
+    verListaDeClientes() {
+      console.log('\nLista de Clientes:');
+      this.clientes.sort((a, b) => a.nome.localeCompare(b.nome))
+                   .forEach(cliente => console.log(cliente));
+      this.menuUsuario();
+    }
+  
+    mudarStatusPedido() {
+      readline.question('Digite o ID do pedido: ', id => {
+        const pedido = this.pedidos.find(p => p.id == id);
+        if (pedido) {
+          readline.question('Digite o novo status (pendente, adiado, realizado, cancelado): ', status => {
+            pedido.status = status;
+            console.log('Status do pedido atualizado com sucesso!');
+            this.menuUsuario();
+          });
+        } else {
+          console.log('Pedido não encontrado.');
+          this.menuUsuario();
+        }
+      });
+    }
+  
+    adicionarProduto() {
+      readline.question('Nome do produto: ', nome => {
+        readline.question('Descrição: ', descricao => {
+          readline.question('Data de validade (AAAA-MM-DD): ', dataValidade => {
+            readline.question('Preço: ', preco => {
+              readline.question('Quantidade em estoque: ', quantidadeEstoque => {
+                const novoProduto = new Produto(dataValidade, parseFloat(preco), parseInt(quantidadeEstoque), nome, descricao);
+                this.produtos.push(novoProduto);
+                console.log('Produto adicionado com sucesso!');
+                this.menuUsuario();
+              });
+            });
+          });
+        });
+      });
+    }
+  
+    editarProduto() {
+      readline.question('Digite o nome do produto a ser editado: ', nome => {
+        const produto = this.produtos.find(p => p.nome === nome);
+        if (produto) {
+          readline.question('Nova descrição: ', descricao => {
+            readline.question('Nova data de validade (AAAA-MM-DD): ', dataValidade => {
+              readline.question('Novo preço: ', preco => {
+                readline.question('Nova quantidade em estoque: ', quantidadeEstoque => {
+                  produto.descricao = descricao;
+                  produto.dataValidade = dataValidade;
+                  produto.preco = parseFloat(preco);
+                  produto.quantidadeEstoque = parseInt(quantidadeEstoque);
+                  console.log('Produto atualizado com sucesso!');
+                  this.menuUsuario();
+                });
+              });
+            });
+          });
+        } else {
+          console.log('Produto não encontrado.');
+          this.menuUsuario();
+        }
+      });
+    }
+  
+    excluirProduto() {
+      readline.question('Digite o nome do produto a ser excluído: ', nome => {
+        const index = this.produtos.findIndex(p => p.nome === nome);
+        if (index !== -1) {
+          this.produtos.splice(index, 1);
+          console.log('Produto excluído com sucesso!');
+        } else {
+          console.log('Produto não encontrado.');
+        }
+        this.menuUsuario();
+      });
+    }
+  
+    fazerPedido() {
+      readline.question('Digite o nome do produto: ', nomeProduto => {
+        const produto = this.produtos.find(p => p.nome === nomeProduto);
+        if (produto) {
+          const idPedido = this.pedidos.length + 1;
+          const novoPedido = new Pedido(idPedido, this.usuarioLogado.id, 'pendente', new Date().toISOString());
+          this.pedidos.push(novoPedido);
+          console.log('Pedido realizado com sucesso!');
+        } else {
+          console.log('Produto não encontrado.');
+        }
+        this.menuUsuario();
+      });
+    }
+  
+    cancelarPedido() {
+      readline.question('Digite o ID do pedido: ', id => {
+        const pedido = this.pedidos.find(p => p.id == id && p.idCliente === this.usuarioLogado.id);
+        if (pedido) {
+          pedido.status = 'cancelado';
+          console.log('Pedido cancelado com sucesso!');
+        } else {
+          console.log('Pedido não encontrado ou não pertence ao cliente logado.');
+        }
+        this.menuUsuario();
+      });
+    }
+  
+    verMeusPedidos() {
+      console.log('\nMeus Pedidos:');
+      this.pedidos.filter(p => p.idCliente === this.usuarioLogado.id)
+                  .sort((a, b) => new Date(a.dataPedido) - new Date(b.dataPedido))
+                  .forEach(pedido => console.log(pedido));
+      this.menuUsuario();
+    }
+  
+    avaliarPedido() {
+      readline.question('Digite o ID do pedido: ', id => {
+        const pedido = this.pedidos.find(p => p.id == id && p.idCliente === this.usuarioLogado.id);
+        if (pedido) {
+          readline.question('Digite sua avaliação (1 a 5): ', avaliacao => {
+            pedido.avaliacao = parseInt(avaliacao);
+            console.log('Avaliação registrada com sucesso!');
+          });
+        } else {
+          console.log('Pedido não encontrado ou não pertence ao cliente logado.');
+        }
+        this.menuUsuario();
+      });
+    }
+  
+    visualizarAvaliacoes() {
+      console.log('\nAvaliações dos meus pedidos:');
+      this.pedidos.filter(p => p.idCliente === this.usuarioLogado.id && p.avaliacao !== null)
+                  .forEach(pedido => console.log(`Pedido ID: ${pedido.id}, Avaliação: ${pedido.avaliacao}`));
+      this.menuUsuario();
+    }
+  }
+  
+  //aqui se inicia o sistema
+  const sistema = new Sistema();
+  sistema.menuPrincipal();
+  
